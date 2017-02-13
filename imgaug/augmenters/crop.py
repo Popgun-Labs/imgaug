@@ -26,6 +26,9 @@ class Crop(Augmenter):
         tuple of ints -> window[0] by window[1] images
         images in (height, width) format)
 
+    center : boolean, optional(default=False)
+        whether to crop from the center only when using the 'window' mode
+
     px : int or tuple, optional(default=None)
         crop a constant, or in a provided range amount of pixels from each the
         (top, right, bottom, left) in that order.
@@ -51,13 +54,15 @@ class Crop(Augmenter):
         If None, the random number generator is the RandomState instance used
         by `np.random`.
     """
-    def __init__(self, window=None, px=None, percent=None, keep_size=True, name=None, deterministic=False, random_state=None):
+    def __init__(self, window=None, center=False, px=None, percent=None, keep_size=True, name=None,
+                 deterministic=False, random_state=None):
         super(Crop, self).__init__(name=name, deterministic=deterministic, random_state=random_state)
 
         self.keep_size = keep_size
 
         if window is not None:
             self.mode = "window"
+            self.center = center
             if ia.is_single_integer(window):
                 self.window = (window, window)
             elif type(window) is tuple and len(window) == 2:
@@ -164,9 +169,14 @@ class Crop(Augmenter):
             seed = seeds[i]
             height, width = images[i].shape[0:2]
             if self.mode == "window":
-                top = np.random.randint(images[i].shape[0] - self.window[0])
+                if self.center:
+                    top = images[i].shape[0] / 2 - self.window[0] / 2
+                    left = images[i].shape[1] / 2 - self.window[1] / 2
+                else:
+                    top = np.random.randint(images[i].shape[0] - self.window[0])
+                    left = np.random.randint(images[i].shape[1] - self.window[1])
+
                 bottom = height - top - self.window[0]
-                left = np.random.randint(images[i].shape[1] - self.window[1])
                 right = width - left - self.window[1]
             else:
                 top, right, bottom, left = self._draw_samples_image(seed, height, width)
