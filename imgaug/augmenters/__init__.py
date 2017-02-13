@@ -1,6 +1,5 @@
-from .base import Augmenter
+from .base import Augmenter, Noop
 from .sequential import Sequential
-from .noop import Noop
 from .sometimes import Sometimes
 from .add import Add, AddElementwise
 from .multiply import Multiply, MultiplyElementwise
