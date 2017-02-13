@@ -51,7 +51,6 @@ class Add(Augmenter):
             self.value = Deterministic(value)
         elif ia.is_iterable(value):
             assert len(value) == 2, "Expected tuple/list with 2 entries, got %d entries." % (len(value),)
-            print(value, type(value[0]))
             self.value = DiscreteUniform(value[0], value[1])
         elif isinstance(value, StochasticParameter):
             self.value = value
