@@ -20,13 +20,21 @@ class Crop(Augmenter):
 
     Parameters
     ----------
-    px : # TODO
+    window : int or tuple, optional(default=None)
+        randomly choose the position with a fixed window.
+        single int -> window by window images
+        tuple of ints -> window[0] by window[1] images
+        images in (height, width) format)
+
+    px : int or tuple, optional(default=None)
+        crop a constant, or in a provided range amount of pixels from each the
+        (top, right, bottom, left) in that order.
 
     percent : tuple, optional(default=None)
         percent crop on each of the axis
 
     keep_size : boolean, optional(default=True)
-        # TODO
+        whether to interpolate the result back to the original image's size
 
     name : string, optional(default=None)
         name of the instance
@@ -43,10 +51,18 @@ class Crop(Augmenter):
         If None, the random number generator is the RandomState instance used
         by `np.random`.
     """
-    def __init__(self, px=None, percent=None, keep_size=True, name=None, deterministic=False, random_state=None):
+    def __init__(self, window=None, px=None, percent=None, keep_size=True, name=None, deterministic=False, random_state=None):
         super(Crop, self).__init__(name=name, deterministic=deterministic, random_state=random_state)
 
         self.keep_size = keep_size
+
+        if window is not None:
+            self.mode = "window"
+            if ia.is_single_integer(window):
+                self.window = (window, window)
+            elif type(window) is tuple and len(window) == 2:
+                self.window = window
+            return
 
         self.all_sides = None
         self.top = None
@@ -147,7 +163,13 @@ class Crop(Augmenter):
         for i in sm.xrange(nb_images):
             seed = seeds[i]
             height, width = images[i].shape[0:2]
-            top, right, bottom, left = self._draw_samples_image(seed, height, width)
+            if self.mode == "window":
+                top = np.random.randint(images[i].shape[0] - self.window[0])
+                bottom = height - top - self.window[0]
+                left = np.random.randint(images[i].shape[1] - self.window[1])
+                right = width - left - self.window[1]
+            else:
+                top, right, bottom, left = self._draw_samples_image(seed, height, width)
             image_cropped = images[i][top:height-bottom, left:width-right, :]
             if self.keep_size:
                 image_cropped = ia.imresize_single_image(image_cropped, (height, width))
