@@ -15,6 +15,28 @@ import six
 import six.moves as sm
 from . import Augmenter
 
+def per_image_standardization(images):
+    """Linearly scales image to have zero mean and unit norm.
+
+    This op computes (x - mean) / adjusted_stddev, where mean is the average of all values in
+    image, and adjusted_stddev = max(stddev, 1.0/sqrt(image.NumElements())).
+
+    stddev is the standard deviation of all values in image. It is capped away from zero to
+    protect against division by 0 when handling uniform images.
+
+    (copies `tf.image.per_image_standardization()` but using numpy instead of tensors)
+
+    Parameters
+    ----------
+    images : numpy array in the shape (batch_size, height, width, channels)
+        The images to linearly standardize
+    """
+    return np.array(map(
+        lambda image:
+            ((image.astype(np.float64) - np.mean(image)) /
+            max(np.std(images), 1.0 / np.sqrt(image.size))),
+        images))
+
 class ContrastNormalization(Augmenter):
     """Augmenter class for ContrastNormalization
 

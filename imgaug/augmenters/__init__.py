@@ -8,7 +8,8 @@ from .flip import Fliplr, Flipud
 from .colorspace import ChangeColorspace, Grayscale
 from .gaussian import GaussianBlur, AdditiveGaussianNoise
 from .dropout import Dropout
-from .normalizer import ContrastNormalization
+from .normalizer import per_image_standardization, ContrastNormalization
 from .crop import Crop
 from .affine import Affine
 from .elastic import ElasticTransformation
+from .adjust import AdjustBrightness, AdjustContrast
