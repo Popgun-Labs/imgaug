@@ -34,7 +34,7 @@ def per_image_standardization(images):
     return np.array(map(
         lambda image:
             ((image.astype(np.float64) - np.mean(image)) /
-            max(np.std(images), 1.0 / np.sqrt(image.size))),
+            max(np.std(image), 1.0 / np.sqrt(image.size))),
         images))
 
 class ContrastNormalization(Augmenter):
